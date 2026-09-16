@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Financiero - Sobres Multi-Moneda</title>
+  
+  <!-- Soporte PWA / Web App -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0b0f19">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(22, 30, 49, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #1e293b;
+      --danger: #f87171;
+      --success: #34d399;
+      --bs-color: #fbbf24;
+      --usd-color: #34d399;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(251, 191, 36, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text);
+      padding: 20px 16px;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #0f172a;
+      box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    .btn-success {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .btn-danger {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn:active { transform: scale(0.98); }
+
+    /* Tarjetas de Sobres */
+    .envelope-card {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .envelope-card:last-child { margin-bottom: 0; }
+
+    .envelope-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .envelope-title {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .envelope-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .envelope-balances {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .balance-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .total-consolidated {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .currency-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 6px;
+    }
+
+    .tag-usd { background: rgba(52, 211, 153, 0.2); color: var(--usd-color); }
+    .tag-bs { background: rgba(251, 191, 36, 0.2); color: var(--bs-color); }
+
+    .val-usd { color: var(--usd-color); }
+    .val-bs { color: var(--bs-color); }
+    .negative { color: var(--danger) !important; }
+
+    /* Historial */
+    details {
+      margin-top: 8px;
+    }
+    summary {
+      font-size: 0.8rem;
+      color: var(--primary);
+      cursor: pointer;
+      user-select: none;
+      padding: 4px 0;
+    }
+    .history-list {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .history-item {
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6px 8px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .history-desc { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Control de Ahorros</h1>
+    <p>Gestión Multi-Moneda (USD / BS)</p>
+  </header>
+
+  <!-- Tasa de Cambio del Día -->
+  <div class="card" style="padding: 14px 20px;">
+    <div class="grid-2" style="align-items: center;">
+      <div>
+        <label for="exchange-rate" style="margin: 0;">Tasa de Cambio (Bs / $)</label>
+      </div>
+      <div>
+        <input type="number" id="exchange-rate" placeholder="Ej. 36.5" step="0.01" oninput="updateExchangeRate(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Crear Nuevo Sobre -->
+  <div class="card">
+    <div class="card-title">📁 Crear Meta / Sobre</div>
+    <div class="form-group">
+      <label for="env-name">Nombre del Sobre</label>
+      <input type="text" id="env-name" placeholder="Ej. Mantenimiento Moto, Salud, Repuestos">
+    </div>
+    <button class="btn btn-primary" onclick="createEnvelope()">+ Crear Sobre</button>
+  </div>
+
+  <!-- Registrar Movimiento -->
+  <div class="card">
+    <div class="card-title">💸 Registrar Movimiento</div>
+    
+    <div class="form-group">
+      <label for="env-select">Seleccionar Sobre</label>
+      <select id="env-select"></select>
+    </div>
+
+    <div class="grid-2 form-group">
+      <div>
+        <label for="currency">Moneda</label>
+        <select id="currency">
+          <option value="USD">Dólares ($)</option>
+          <option value="BS">Bolívares (Bs)</option>
+        </select>
+      </div>
+      <div>
+        <label for="amount">Monto</label>
+        <input type="number" id="amount" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="note">Descripción / Nota (Opcional)</label>
+      <input type="text" id="note" placeholder="Ej. Cambio de aceite, compra de medicinas">
+    </div>
+
+    <div class="grid-2">
+      <button class="btn btn-success" onclick="addTransaction('deposit')">+ Abonar</button>
+      <button class="btn btn-danger" onclick="addTransaction('expense')">- Gastar</button>
+    </div>
+  </div>
+
+  <!-- Lista de Sobres -->
+  <div class="card">
+    <div class="card-title">📊 Estado de tus Sobres</div>
+    <div id="envelopes-list">
+      <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">
+        No has creado ningún sobre aún.
+      </p>
+    </div>
+  </div>
+
+  <!-- Respaldo / Drive -->
+  <div class="card">
+    <div class="card-title">💾 Copia de Seguridad (Drive / Local)</div>
+    <div class="grid-2">
+      <button class="btn btn-outline" onclick="exportData()">⬇️ Guardar Backup</button>
+      <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">⬆️ Cargar Backup</button>
+    </div>
+    <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importData(event)">
+  </div>
+
+  <script>
+    let exchangeRate = parseFloat(localStorage.getItem('exchange_rate')) || 0;
+    let envelopes = JSON.parse(localStorage.getItem('envelopes_v2')) || [
+      { id: '1', name: 'Mantenimiento Moto', usd: 0, bs: 0, history: [] },
+      { id: '2', name: 'Salud / Emergencias', usd: 0, bs: 0, history: [] }
+    ];
+
+    document.getElementById('exchange-rate').value = exchangeRate || '';
+
+    function updateExchangeRate(val) {
+      exchangeRate = parseFloat(val) || 0;
+      localStorage.setItem('exchange_rate', exchangeRate);
+      renderEnvelopes();
+    }
+
+    function saveAndRender() {
+      localStorage.setItem('envelopes_v2', JSON.stringify(envelopes));
+      renderEnvelopes();
+    }
+
+    function createEnvelope() {
+      const nameInput = document.getElementById('env-name');
+      const name = nameInput.value.trim();
+      if (!name) return;
+
+      envelopes.push({
+        id: Date.now().toString(),
+        name: name,
+        usd: 0,
+        bs: 0,
+        history: []
+      });
+
+      nameInput.value = '';
+      saveAndRender();
+    }
+
+    function editEnvelope(id) {
+      const env = envelopes.find(e => e.id === id);
+      if (!env) return;
+
+      const newName = prompt('Editar nombre del sobre:', env.name);
+      if (newName && newName.trim() !== '') {
+        env.name = newName.trim();
+        saveAndRender();
+      }
+    }
+
+    function deleteEnvelope(id) {
+      const env = envelopes.find(e => e.id === id);
+      if (!env) return;
+
+      const confirmDelete = confirm(`¿Estás seguro de que deseas eliminar el sobre "${env.name}"?`);
+      if (confirmDelete) {
+        envelopes = envelopes.filter(e => e.id !== id);
+        saveAndRender();
+      }
+    }
+
+    function addTransaction(type) {
+      const select = document.getElementById('env-select');
+      const currency = document.getElementById('currency').value;
+      const amountInput = document.getElementById('amount');
+      const noteInput = document.getElementById('note');
+      const amount = parseFloat(amountInput.value);
+
+      if (!select.value || isNaN(amount) || amount <= 0) return;
+
+      const envelope = envelopes.find(e => e.id === select.value);
+      if (envelope) {
+        const delta = type === 'deposit' ? amount : -amount;
+        if (currency === 'USD') {
+          envelope.usd += delta;
+        } else {
+          envelope.bs += delta;
+        }
+
+        // Registrar en historial
+        if (!envelope.history) envelope.history = [];
+        envelope.history.unshift({
+          date: new Date().toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
+          type: type,
+          currency: currency,
+          amount: amount,
+          note: noteInput.value.trim() || (type === 'deposit' ? 'Abono' : 'Gasto')
+        });
+
+        amountInput.value = '';
+        noteInput.value = '';
+        saveAndRender();
+      }
+    }
+
+    function renderEnvelopes() {
+      const listContainer = document.getElementById('envelopes-list');
+      const selectContainer = document.getElementById('env-select');
+
+      listContainer.innerHTML = '';
+      selectContainer.innerHTML = '';
+
+      if (envelopes.length === 0) {
+        listContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">No hay sobres registrados.</p>';
+        return;
+      }
+
+      envelopes.forEach(env => {
+        // Cálculo del total consolidado aproximado en USD si hay tasa declarada
+        let totalUSD = env.usd;
+        if (exchangeRate > 0) {
+          totalUSD += (env.bs / exchangeRate);
+        }
+
+        const historyHtml = (env.history && env.history.length > 0)
+          ? env.history.map(h => `
+              <div class="history-item">
+                <span class="history-desc">${h.date} - ${h.note}</span>
+                <span style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
+                  ${h.type === 'deposit' ? '+' : '-'}${h.currency === 'USD' ? '$' : 'Bs.'}${h.amount.toFixed(2)}
+                </span>
+              </div>
+            `).join('')
+          : '<p style="font-size: 0.75rem; color: var(--text-muted); padding: 4px 0;">Sin movimientos registrados.</p>';
+
+        const item = document.createElement('div');
+        item.className = 'envelope-card';
+        item.innerHTML = `
+          <div class="envelope-header">
+            <span class="envelope-title">${env.name}</span>
+            <div class="envelope-actions">
+              <button class="btn-icon" onclick="editEnvelope('${env.id}')" title="Editar sobre">✏️</button>
+              <button class="btn-icon" onclick="deleteEnvelope('${env.id}')" title="Eliminar sobre">🗑️</button>
+            </div>
+          </div>
+          <div class="envelope-balances">
+            <div class="balance-row">
+              <span><span class="currency-tag tag-usd">USD</span>Dólares</span>
+              <span class="val-usd ${env.usd < 0 ? 'negative' : ''}">$${env.usd.toFixed(2)}</span>
+            </div>
+            <div class="balance-row">
+              <span><span class="currency-tag tag-bs">BS</span>Bolívares</span>
+              <span class="val-bs ${env.bs < 0 ? 'negative' : ''}">Bs. ${env.bs.toFixed(2)}</span>
+            </div>
+            ${exchangeRate > 0 ? `
+              <div class="total-consolidated">
+                <span>Total Estimado (USD)</span>
+                <span style="font-weight: 700; color: var(--primary);">$${totalUSD.toFixed(2)}</span>
+              </div>
+            ` : ''}
+          </div>
+          <details>
+            <summary>📋 Ver Historial de Movimientos</summary>
+            <div class="history-list">
+              ${historyHtml}
+            </div>
+          </details>
+        `;
+        listContainer.appendChild(item);
+
+        const option = document.createElement('option');
+        option.value = env.id;
+        option.textContent = env.name;
+        selectContainer.appendChild(option);
+      });
+    }
+
+    // Funciones de Respaldo y Carga
+    function exportData() {
+      const dataToExport = {
+        exchangeRate: exchangeRate,
+        envelopes: envelopes
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `ahorros_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            // Compatibilidad con backups antiguos
+            envelopes = imported;
+          } else if (imported.envelopes) {
+            envelopes = imported.envelopes;
+            if (imported.exchangeRate) {
+              exchangeRate = imported.exchangeRate;
+              document.getElementById('exchange-rate').value = exchangeRate;
+              localStorage.setItem('exchange_rate', exchangeRate);
+            }
+          }
+          saveAndRender();
+          alert('¡Copia de seguridad restaurada con éxito!');
+        } catch (err) {
+          alert('Error al leer el archivo de respaldo.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Inicialización
+    renderEnvelopes();
+  </script>
+</body>
+</html>
