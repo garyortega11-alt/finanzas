@@ -135,7 +135,7 @@
       color: var(--text);
       font-size: 0.95rem;
       outline: none;
-      transition: all 0.25 ease;
+      transition: all 0.25s ease;
     }
 
     input:focus, select:focus {
@@ -350,7 +350,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      max-height: 160px;
+      max-height: 180px;
       overflow-y: auto;
       padding-right: 4px;
     }
@@ -370,8 +370,41 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
     }
-    .history-desc { color: var(--text-muted); }
+    .history-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+    .history-desc { 
+      color: var(--text-muted); 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .history-amount-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .btn-delete-trans {
+      background: transparent;
+      border: none;
+      color: rgba(248, 113, 113, 0.5);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      transition: all 0.2s ease;
+    }
+    .btn-delete-trans:hover {
+      color: var(--danger);
+      background: rgba(248, 113, 113, 0.15);
+    }
 
     @media (min-width: 480px) {
       body { max-width: 540px; }
@@ -574,6 +607,7 @@
 
         if (!envelope.history) envelope.history = [];
         envelope.history.unshift({
+          id: Date.now().toString(),
           date: new Date().toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
           type: type,
           currency: currency,
@@ -583,6 +617,31 @@
 
         amountInput.value = '';
         noteInput.value = '';
+        saveAndRender();
+      }
+    }
+
+    function deleteTransaction(envId, transId) {
+      const env = envelopes.find(e => e.id === envId);
+      if (!env || !env.history) return;
+
+      const transIndex = env.history.findIndex(h => h.id === transId);
+      if (transIndex === -1) return;
+
+      const trans = env.history[transIndex];
+      const confirmDelete = confirm(`¿Eliminar el movimiento "${trans.note}" de ${trans.currency === 'USD' ? '$' : 'Bs.'}${trans.amount.toFixed(2)}?`);
+      
+      if (confirmDelete) {
+        // Revertir el impacto financiero del movimiento
+        const delta = trans.type === 'deposit' ? -trans.amount : trans.amount;
+        if (trans.currency === 'USD') {
+          env.usd += delta;
+        } else {
+          env.bs += delta;
+        }
+
+        // Eliminar del historial
+        env.history.splice(transIndex, 1);
         saveAndRender();
       }
     }
@@ -604,10 +663,15 @@
 
       container.innerHTML = filtered.map(h => `
         <div class="history-item">
-          <span class="history-desc">${h.date} - ${h.note}</span>
-          <span class="num-font" style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
-            ${h.type === 'deposit' ? '+' : '-'}${h.currency === 'USD' ? '$' : 'Bs.'}${h.amount.toFixed(2)}
-          </span>
+          <div class="history-info">
+            <span class="history-desc">${h.date} - ${h.note}</span>
+          </div>
+          <div class="history-amount-group">
+            <span class="num-font" style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
+              ${h.type === 'deposit' ? '+' : '-'}${h.currency === 'USD' ? '$' : 'Bs.'}${h.amount.toFixed(2)}
+            </span>
+            <button class="btn-delete-trans" onclick="deleteTransaction('${env.id}', '${h.id}')" title="Eliminar movimiento">✖</button>
+          </div>
         </div>
       `).join('');
     }
@@ -635,13 +699,25 @@
           totalUSD += (env.bs / exchangeRate);
         }
 
+        // Asignar ID si falta en historiales antiguos
+        if (env.history) {
+          env.history.forEach(h => {
+            if (!h.id) h.id = Math.random().toString(36).substring(2, 9);
+          });
+        }
+
         const historyHtml = (env.history && env.history.length > 0)
           ? env.history.map(h => `
               <div class="history-item">
-                <span class="history-desc">${h.date} - ${h.note}</span>
-                <span class="num-font" style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
-                  ${h.type === 'deposit' ? '+' : '-'}${h.currency === 'USD' ? '$' : 'Bs.'}${h.amount.toFixed(2)}
-                </span>
+                <div class="history-info">
+                  <span class="history-desc">${h.date} - ${h.note}</span>
+                </div>
+                <div class="history-amount-group">
+                  <span class="num-font" style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
+                    ${h.type === 'deposit' ? '+' : '-'}${h.currency === 'USD' ? '$' : 'Bs.'}${h.amount.toFixed(2)}
+                  </span>
+                  <button class="btn-delete-trans" onclick="deleteTransaction('${env.id}', '${h.id}')" title="Eliminar movimiento">✖</button>
+                </div>
               </div>
             `).join('')
           : '<p style="font-size: 0.75rem; color: var(--text-muted); padding: 4px 0;">Sin movimientos registrados.</p>';
@@ -753,4 +829,4 @@
     renderEnvelopes();
   </script>
 </body>
-</html>
+      </html>
