@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control Financiero - Sobres Multi-Moneda</title>
   
-  <!-- Soporte PWA / Web App -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
@@ -83,6 +82,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .dashboard-card {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(168, 85, 247, 0.12) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.25);
     }
 
     .form-group {
@@ -259,8 +263,13 @@
       user-select: none;
       padding: 4px 0;
     }
+    .history-search {
+      margin: 6px 0;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+    }
     .history-list {
-      margin-top: 8px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -276,6 +285,15 @@
       justify-content: space-between;
     }
     .history-desc { color: var(--text-muted); }
+
+    /* Resultado Calculadora */
+    .calc-result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -284,6 +302,25 @@
     <h1>Control de Ahorros</h1>
     <p>Gestión Multi-Moneda (USD / BS)</p>
   </header>
+
+  <!-- OPCIÓN 5: Dashboard de Totales Generales -->
+  <div class="card dashboard-card">
+    <div class="card-title" style="margin-bottom: 10px;">👑 Total General Disponible</div>
+    <div class="envelope-balances" style="background: rgba(0, 0, 0, 0.3);">
+      <div class="balance-row">
+        <span><span class="currency-tag tag-usd">USD</span>Dólares en Sobres</span>
+        <span class="val-usd" id="dash-usd">$0.00</span>
+      </div>
+      <div class="balance-row">
+        <span><span class="currency-tag tag-bs">BS</span>Bolívares en Sobres</span>
+        <span class="val-bs" id="dash-bs">Bs. 0.00</span>
+      </div>
+      <div class="total-consolidated" id="dash-consolidated-container" style="display: none;">
+        <span>Consolidado Total Estimado</span>
+        <span style="font-weight: 700; color: var(--primary); font-size: 0.95rem;" id="dash-consolidated">$0.00</span>
+      </div>
+    </div>
+  </div>
 
   <!-- Tasa de Cambio del Día -->
   <div class="card" style="padding: 14px 20px;">
@@ -295,6 +332,29 @@
         <input type="number" id="exchange-rate" placeholder="Ej. 36.5" step="0.01" oninput="updateExchangeRate(this.value)">
       </div>
     </div>
+  </div>
+
+  <!-- OPCIÓN 3: Calculadora Rápida para Compras -->
+  <div class="card">
+    <div class="card-title">🧮 Calculadora Rápida de Compras</div>
+    <div class="form-group">
+      <label for="calc-select">Sobre a consultar</label>
+      <select id="calc-select" onchange="calculatePurchase()"></select>
+    </div>
+    <div class="grid-2 form-group">
+      <div>
+        <label for="calc-currency">Moneda</label>
+        <select id="calc-currency" onchange="calculatePurchase()">
+          <option value="USD">Dólares ($)</option>
+          <option value="BS">Bolívares (Bs)</option>
+        </select>
+      </div>
+      <div>
+        <label for="calc-amount">Costo del producto</label>
+        <input type="number" id="calc-amount" placeholder="0.00" step="0.01" oninput="calculatePurchase()">
+      </div>
+    </div>
+    <div id="calc-result" class="calc-result"></div>
   </div>
 
   <!-- Crear Nuevo Sobre -->
@@ -374,11 +434,13 @@
       exchangeRate = parseFloat(val) || 0;
       localStorage.setItem('exchange_rate', exchangeRate);
       renderEnvelopes();
+      calculatePurchase();
     }
 
     function saveAndRender() {
       localStorage.setItem('envelopes_v2', JSON.stringify(envelopes));
       renderEnvelopes();
+      calculatePurchase();
     }
 
     function createEnvelope() {
@@ -438,7 +500,6 @@
           envelope.bs += delta;
         }
 
-        // Registrar en historial
         if (!envelope.history) envelope.history = [];
         envelope.history.unshift({
           date: new Date().toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
@@ -454,20 +515,88 @@
       }
     }
 
-    function renderEnvelopes() {
-      const listContainer = document.getElementById('envelopes-list');
-      const selectContainer = document.getElementById('env-select');
+    // OPCIÓN 2: Filtrar historial por búsqueda
+    function filterHistory(envId, query) {
+      const container = document.getElementById(`history-list-${envId}`);
+      const env = envelopes.find(e => e.id === envId);
+      if (!env || !container) return;
 
-      listContainer.innerHTML = '';
-      selectContainer.innerHTML = '';
+      const q = query.toLowerCase().trim();
+      const filtered = (env.history || []).filter(h => 
+        h.note.toLowerCase().includes(q) || h.date.toLowerCase().includes(q)
+      );
 
-      if (envelopes.length === 0) {
-        listContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">No hay sobres registrados.</p>';
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="font-size: 0.75rem; color: var(--text-muted); padding: 4px 0;">Sin coincidencias.</p>';
         return;
       }
 
+      container.innerHTML = filtered.map(h => `
+        <div class="history-item">
+          <span class="history-desc">${h.date} - ${h.note}</span>
+          <span style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
+            ${h.type === 'deposit' ? '+' : '-'}${h.currency === 'USD' ? '$' : 'Bs.'}${h.amount.toFixed(2)}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    // OPCIÓN 3: Calculadora rápida de compras
+    function calculatePurchase() {
+      const select = document.getElementById('calc-select');
+      const currency = document.getElementById('calc-currency').value;
+      const amountInput = document.getElementById('calc-amount');
+      const resultBox = document.getElementById('calc-result');
+      const cost = parseFloat(amountInput.value);
+
+      if (!select.value || isNaN(cost) || cost <= 0) {
+        resultBox.style.display = 'none';
+        return;
+      }
+
+      const env = envelopes.find(e => e.id === select.value);
+      if (!env) return;
+
+      const available = currency === 'USD' ? env.usd : env.bs;
+      const symbol = currency === 'USD' ? '$' : 'Bs.';
+      const diff = available - cost;
+
+      resultBox.style.display = 'block';
+
+      if (diff >= 0) {
+        resultBox.style.background = 'rgba(52, 211, 153, 0.15)';
+        resultBox.style.border = '1px solid rgba(52, 211, 153, 0.3)';
+        resultBox.style.color = 'var(--success)';
+        resultBox.innerHTML = `✅ <b>¡Alcanza!</b> Te quedarán ${symbol}${diff.toFixed(2)} disponibles en este sobre.`;
+      } else {
+        resultBox.style.background = 'rgba(248, 113, 113, 0.15)';
+        resultBox.style.border = '1px solid rgba(248, 113, 113, 0.3)';
+        resultBox.style.color = 'var(--danger)';
+        resultBox.innerHTML = `⚠️ <b>No alcanza.</b> Te faltan ${symbol}${Math.abs(diff).toFixed(2)} en este sobre.`;
+      }
+    }
+
+    function renderEnvelopes() {
+      const listContainer = document.getElementById('envelopes-list');
+      const selectContainer = document.getElementById('env-select');
+      const calcSelectContainer = document.getElementById('calc-select');
+
+      listContainer.innerHTML = '';
+      selectContainer.innerHTML = '';
+      calcSelectContainer.innerHTML = '';
+
+      // Totales Generales (Dashboard - Opción 5)
+      let totalUSDAll = 0;
+      let totalBsAll = 0;
+
+      if (envelopes.length === 0) {
+        listContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">No hay sobres registrados.</p>';
+      }
+
       envelopes.forEach(env => {
-        // Cálculo del total consolidado aproximado en USD si hay tasa declarada
+        totalUSDAll += env.usd;
+        totalBsAll += env.bs;
+
         let totalUSD = env.usd;
         if (exchangeRate > 0) {
           totalUSD += (env.bs / exchangeRate);
@@ -512,7 +641,8 @@
           </div>
           <details>
             <summary>📋 Ver Historial de Movimientos</summary>
-            <div class="history-list">
+            <input type="text" class="history-search" placeholder="🔍 Buscar por nota o fecha..." oninput="filterHistory('${env.id}', this.value)">
+            <div class="history-list" id="history-list-${env.id}">
               ${historyHtml}
             </div>
           </details>
@@ -523,7 +653,23 @@
         option.value = env.id;
         option.textContent = env.name;
         selectContainer.appendChild(option);
+
+        const calcOption = option.cloneNode(true);
+        calcSelectContainer.appendChild(calcOption);
       });
+
+      // Actualizar Dashboard Superior
+      document.getElementById('dash-usd').textContent = `$${totalUSDAll.toFixed(2)}`;
+      document.getElementById('dash-bs').textContent = `Bs. ${totalBsAll.toFixed(2)}`;
+      
+      const dashConsolidatedContainer = document.getElementById('dash-consolidated-container');
+      if (exchangeRate > 0) {
+        const grandTotalConsolidated = totalUSDAll + (totalBsAll / exchangeRate);
+        document.getElementById('dash-consolidated').textContent = `$${grandTotalConsolidated.toFixed(2)}`;
+        dashConsolidatedContainer.style.display = 'flex';
+      } else {
+        dashConsolidatedContainer.style.display = 'none';
+      }
     }
 
     // Funciones de Respaldo y Carga
@@ -550,7 +696,6 @@
         try {
           const imported = JSON.parse(e.target.result);
           if (Array.isArray(imported)) {
-            // Compatibilidad con backups antiguos
             envelopes = imported;
           } else if (imported.envelopes) {
             envelopes = imported.envelopes;
