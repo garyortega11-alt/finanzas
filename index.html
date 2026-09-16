@@ -7,25 +7,30 @@
   
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#0b0f19">
+  <meta name="theme-color" content="#090d16">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg: #0b0f19;
-      --card-bg: rgba(22, 30, 49, 0.75);
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.7);
       --card-border: rgba(255, 255, 255, 0.08);
       --primary: #38bdf8;
       --primary-glow: rgba(56, 189, 248, 0.25);
+      --accent: #a855f7;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --border: #1e293b;
       --danger: #f87171;
+      --danger-glow: rgba(248, 113, 113, 0.2);
       --success: #34d399;
+      --success-glow: rgba(52, 211, 153, 0.2);
       --bs-color: #fbbf24;
       --usd-color: #34d399;
+      --font-num: 'JetBrains Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -33,60 +38,78 @@
     body {
       background-color: var(--bg);
       background-image: 
-        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(251, 191, 36, 0.05) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 40%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.08) 0px, transparent 40%),
+        radial-gradient(at 50% 50%, rgba(251, 191, 36, 0.03) 0px, transparent 60%);
       background-attachment: fixed;
       color: var(--text);
-      padding: 20px 16px;
-      max-width: 480px;
+      padding: 24px 16px;
+      max-width: 500px;
       margin: 0 auto;
       min-height: 100vh;
     }
 
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
+      font-size: 1.65rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #38bdf8 0%, #a855f7 50%, #f472b6 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
 
     header p {
       font-size: 0.85rem;
       color: var(--text-muted);
       margin-top: 4px;
+      font-weight: 500;
     }
 
     .card {
       background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
     }
 
     .card-title {
       font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
       color: var(--text);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      letter-spacing: -0.01em;
     }
 
+    /* Dashboard Principal Premium */
     .dashboard-card {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(168, 85, 247, 0.12) 100%);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
     }
 
     .form-group {
@@ -95,10 +118,10 @@
 
     label {
       display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.72rem;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
       color: var(--text-muted);
       margin-bottom: 6px;
     }
@@ -106,63 +129,88 @@
     input, select {
       width: 100%;
       padding: 12px 14px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.75);
       color: var(--text);
       font-size: 0.95rem;
       outline: none;
-      transition: all 0.2s ease;
+      transition: all 0.25 ease;
     }
 
     input:focus, select:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 3px var(--primary-glow);
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .num-font {
+      font-family: var(--font-num);
     }
 
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 12px;
     }
 
     .btn {
       width: 100%;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 12px 16px;
+      border-radius: 12px;
       border: none;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .btn-primary {
-      background: var(--primary);
+      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
       color: #0f172a;
-      box-shadow: 0 4px 12px var(--primary-glow);
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--primary-glow);
     }
 
     .btn-success {
-      background: rgba(52, 211, 153, 0.15);
+      background: rgba(52, 211, 153, 0.12);
       color: var(--success);
       border: 1px solid rgba(52, 211, 153, 0.3);
     }
 
+    .btn-success:hover {
+      background: rgba(52, 211, 153, 0.22);
+      box-shadow: 0 4px 12px var(--success-glow);
+    }
+
     .btn-danger {
-      background: rgba(248, 113, 113, 0.15);
+      background: rgba(248, 113, 113, 0.12);
       color: var(--danger);
       border: 1px solid rgba(248, 113, 113, 0.3);
     }
 
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, 0.22);
+      box-shadow: 0 4px 12px var(--danger-glow);
+    }
+
     .btn-outline {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.03);
       color: var(--text);
       border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .btn-icon {
@@ -170,9 +218,9 @@
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      padding: 6px;
+      border-radius: 8px;
+      font-size: 0.9rem;
       transition: all 0.2s ease;
     }
 
@@ -181,29 +229,50 @@
       background: rgba(255, 255, 255, 0.1);
     }
 
-    .btn:active { transform: scale(0.98); }
+    .btn:active { transform: scale(0.97); }
 
-    /* Tarjetas de Sobres */
-    .envelope-card {
-      background: rgba(15, 23, 42, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
+    /* Tarjetas de Sobres Tipo Glass Digital */
+    .envelopes-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    .envelope-card:last-child { margin-bottom: 0; }
+    .envelope-card {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .envelope-card:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.4);
+    }
 
     .envelope-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .envelope-title {
-      font-weight: 600;
-      font-size: 1rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .envelope-icon {
+      font-size: 1.25rem;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 6px 10px;
+      border-radius: 10px;
     }
 
     .envelope-actions {
@@ -214,77 +283,99 @@
     .envelope-balances {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 8px 12px;
-      border-radius: 8px;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
     }
 
     .balance-row {
       display: flex;
       justify-content: space-between;
-      font-size: 0.9rem;
+      align-items: center;
+      font-size: 0.92rem;
       font-weight: 600;
     }
 
     .total-consolidated {
       margin-top: 6px;
       padding-top: 6px;
-      border-top: 1px dashed var(--border);
-      font-size: 0.8rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      font-size: 0.82rem;
       color: var(--text-muted);
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
 
     .currency-tag {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-right: 6px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
     }
 
-    .tag-usd { background: rgba(52, 211, 153, 0.2); color: var(--usd-color); }
-    .tag-bs { background: rgba(251, 191, 36, 0.2); color: var(--bs-color); }
+    .tag-usd { background: rgba(52, 211, 153, 0.15); color: var(--usd-color); border: 1px solid rgba(52, 211, 153, 0.2); }
+    .tag-bs { background: rgba(251, 191, 36, 0.15); color: var(--bs-color); border: 1px solid rgba(251, 191, 36, 0.2); }
 
-    .val-usd { color: var(--usd-color); }
-    .val-bs { color: var(--bs-color); }
+    .val-usd { color: var(--usd-color); font-weight: 700; }
+    .val-bs { color: var(--bs-color); font-weight: 700; }
     .negative { color: var(--danger) !important; }
 
     /* Historial */
     details {
-      margin-top: 8px;
+      margin-top: 10px;
     }
     summary {
       font-size: 0.8rem;
+      font-weight: 600;
       color: var(--primary);
       cursor: pointer;
       user-select: none;
       padding: 4px 0;
+      transition: color 0.2s;
+    }
+    summary:hover {
+      color: var(--accent);
     }
     .history-search {
-      margin: 6px 0;
-      padding: 6px 10px;
-      font-size: 0.75rem;
-      border-radius: 6px;
+      margin: 8px 0;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      border-radius: 8px;
     }
     .history-list {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      max-height: 150px;
+      max-height: 160px;
       overflow-y: auto;
+      padding-right: 4px;
+    }
+    .history-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .history-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
     }
     .history-item {
-      font-size: 0.75rem;
-      background: rgba(255, 255, 255, 0.03);
-      padding: 6px 8px;
-      border-radius: 6px;
+      font-size: 0.78rem;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 8px 10px;
+      border-radius: 8px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
     .history-desc { color: var(--text-muted); }
+
+    @media (min-width: 480px) {
+      body { max-width: 540px; }
+    }
   </style>
 </head>
 <body>
@@ -296,31 +387,33 @@
 
   <!-- Dashboard de Totales Generales -->
   <div class="card dashboard-card">
-    <div class="card-title" style="margin-bottom: 10px;">👑 Total General Disponible</div>
-    <div class="envelope-balances" style="background: rgba(0, 0, 0, 0.3);">
+    <div class="card-title" style="margin-bottom: 12px;">
+      <span>👑 Total General Disponible</span>
+    </div>
+    <div class="envelope-balances" style="background: rgba(0, 0, 0, 0.35);">
       <div class="balance-row">
-        <span><span class="currency-tag tag-usd">USD</span>Dólares en Sobres</span>
-        <span class="val-usd" id="dash-usd">$0.00</span>
+        <span><span class="currency-tag tag-usd">USD</span>Dólares</span>
+        <span class="val-usd num-font" id="dash-usd" style="font-size: 1.05rem;">$0.00</span>
       </div>
       <div class="balance-row">
-        <span><span class="currency-tag tag-bs">BS</span>Bolívares en Sobres</span>
-        <span class="val-bs" id="dash-bs">Bs. 0.00</span>
+        <span><span class="currency-tag tag-bs">BS</span>Bolívares</span>
+        <span class="val-bs num-font" id="dash-bs" style="font-size: 1.05rem;">Bs. 0.00</span>
       </div>
       <div class="total-consolidated" id="dash-consolidated-container" style="display: none;">
-        <span>Consolidado Total Estimado</span>
-        <span style="font-weight: 700; color: var(--primary); font-size: 0.95rem;" id="dash-consolidated">$0.00</span>
+        <span style="font-weight: 600;">Consolidado Estimado</span>
+        <span class="num-font" style="font-weight: 700; color: var(--primary); font-size: 1.1rem;" id="dash-consolidated">$0.00</span>
       </div>
     </div>
   </div>
 
   <!-- Tasa de Cambio del Día -->
-  <div class="card" style="padding: 14px 20px;">
+  <div class="card" style="padding: 16px 20px;">
     <div class="grid-2" style="align-items: center;">
       <div>
         <label for="exchange-rate" style="margin: 0;">Tasa de Cambio (Bs / $)</label>
       </div>
       <div>
-        <input type="number" id="exchange-rate" placeholder="Ej. 36.5" step="0.01" oninput="updateExchangeRate(this.value)">
+        <input type="number" id="exchange-rate" class="num-font" placeholder="Ej. 36.50" step="0.01" oninput="updateExchangeRate(this.value)">
       </div>
     </div>
   </div>
@@ -330,7 +423,7 @@
     <div class="card-title">📁 Crear Meta / Sobre</div>
     <div class="form-group">
       <label for="env-name">Nombre del Sobre</label>
-      <input type="text" id="env-name" placeholder="Ej. Mantenimiento Moto, Salud, Repuestos">
+      <input type="text" id="env-name" placeholder="Ej. Mantenimiento Moto, Salud, Mercado">
     </div>
     <button class="btn btn-primary" onclick="createEnvelope()">+ Crear Sobre</button>
   </div>
@@ -354,13 +447,13 @@
       </div>
       <div>
         <label for="amount">Monto</label>
-        <input type="number" id="amount" placeholder="0.00" step="0.01">
+        <input type="number" id="amount" class="num-font" placeholder="0.00" step="0.01">
       </div>
     </div>
 
     <div class="form-group">
       <label for="note">Descripción / Nota (Opcional)</label>
-      <input type="text" id="note" placeholder="Ej. Cambio de aceite, compra de medicinas">
+      <input type="text" id="note" placeholder="Ej. Repuesto, medicina, abono">
     </div>
 
     <div class="grid-2">
@@ -372,7 +465,7 @@
   <!-- Lista de Sobres -->
   <div class="card">
     <div class="card-title">📊 Estado de tus Sobres</div>
-    <div id="envelopes-list">
+    <div id="envelopes-list" class="envelopes-grid">
       <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">
         No has creado ningún sobre aún.
       </p>
@@ -381,7 +474,7 @@
 
   <!-- Respaldo / Drive -->
   <div class="card">
-    <div class="card-title">💾 Copia de Seguridad (Drive / Local)</div>
+    <div class="card-title">💾 Copia de Seguridad</div>
     <div class="grid-2">
       <button class="btn btn-outline" onclick="exportData()">⬇️ Guardar Backup</button>
       <button class="btn btn-outline" onclick="document.getElementById('import-file').click()">⬆️ Cargar Backup</button>
@@ -397,6 +490,19 @@
     ];
 
     document.getElementById('exchange-rate').value = exchangeRate || '';
+
+    // Asignación automática de iconos según el nombre del sobre
+    function getEnvelopeIcon(name) {
+      const n = name.toLowerCase();
+      if (n.includes('moto') || n.includes('repuesto') || n.includes('vehiculo')) return '🏍️';
+      if (n.includes('salud') || n.includes('medicina') || n.includes('doctor')) return '🏥';
+      if (n.includes('mercado') || n.includes('comida') || n.includes('alimento')) return '🛒';
+      if (n.includes('ahorro') || n.includes('meta')) return '🎯';
+      if (n.includes('viaje') || n.includes('vacaciones')) return '✈️';
+      if (n.includes('casa') || n.includes('hogar')) return '🏠';
+      if (n.includes('gusto') || n.includes('salida')) return '🍿';
+      return '📁';
+    }
 
     function updateExchangeRate(val) {
       exchangeRate = parseFloat(val) || 0;
@@ -481,7 +587,6 @@
       }
     }
 
-    // Filtrar historial por búsqueda
     function filterHistory(envId, query) {
       const container = document.getElementById(`history-list-${envId}`);
       const env = envelopes.find(e => e.id === envId);
@@ -500,7 +605,7 @@
       container.innerHTML = filtered.map(h => `
         <div class="history-item">
           <span class="history-desc">${h.date} - ${h.note}</span>
-          <span style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
+          <span class="num-font" style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
             ${h.type === 'deposit' ? '+' : '-'}${h.currency === 'USD' ? '$' : 'Bs.'}${h.amount.toFixed(2)}
           </span>
         </div>
@@ -514,7 +619,6 @@
       listContainer.innerHTML = '';
       selectContainer.innerHTML = '';
 
-      // Totales Generales (Dashboard)
       let totalUSDAll = 0;
       let totalBsAll = 0;
 
@@ -535,18 +639,23 @@
           ? env.history.map(h => `
               <div class="history-item">
                 <span class="history-desc">${h.date} - ${h.note}</span>
-                <span style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
+                <span class="num-font" style="color: ${h.type === 'deposit' ? 'var(--success)' : 'var(--danger)'}">
                   ${h.type === 'deposit' ? '+' : '-'}${h.currency === 'USD' ? '$' : 'Bs.'}${h.amount.toFixed(2)}
                 </span>
               </div>
             `).join('')
           : '<p style="font-size: 0.75rem; color: var(--text-muted); padding: 4px 0;">Sin movimientos registrados.</p>';
 
+        const icon = getEnvelopeIcon(env.name);
+
         const item = document.createElement('div');
         item.className = 'envelope-card';
         item.innerHTML = `
           <div class="envelope-header">
-            <span class="envelope-title">${env.name}</span>
+            <span class="envelope-title">
+              <span class="envelope-icon">${icon}</span>
+              ${env.name}
+            </span>
             <div class="envelope-actions">
               <button class="btn-icon" onclick="editEnvelope('${env.id}')" title="Editar sobre">✏️</button>
               <button class="btn-icon" onclick="deleteEnvelope('${env.id}')" title="Eliminar sobre">🗑️</button>
@@ -555,22 +664,22 @@
           <div class="envelope-balances">
             <div class="balance-row">
               <span><span class="currency-tag tag-usd">USD</span>Dólares</span>
-              <span class="val-usd ${env.usd < 0 ? 'negative' : ''}">$${env.usd.toFixed(2)}</span>
+              <span class="val-usd num-font ${env.usd < 0 ? 'negative' : ''}">$${env.usd.toFixed(2)}</span>
             </div>
             <div class="balance-row">
               <span><span class="currency-tag tag-bs">BS</span>Bolívares</span>
-              <span class="val-bs ${env.bs < 0 ? 'negative' : ''}">Bs. ${env.bs.toFixed(2)}</span>
+              <span class="val-bs num-font ${env.bs < 0 ? 'negative' : ''}">Bs. ${env.bs.toFixed(2)}</span>
             </div>
             ${exchangeRate > 0 ? `
               <div class="total-consolidated">
-                <span>Total Estimado (USD)</span>
-                <span style="font-weight: 700; color: var(--primary);">$${totalUSD.toFixed(2)}</span>
+                <span>Total Estimado</span>
+                <span class="num-font" style="font-weight: 700; color: var(--primary);">$${totalUSD.toFixed(2)}</span>
               </div>
             ` : ''}
           </div>
           <details>
-            <summary>📋 Ver Historial de Movimientos</summary>
-            <input type="text" class="history-search" placeholder="🔍 Buscar por nota o fecha..." oninput="filterHistory('${env.id}', this.value)">
+            <summary>📋 Historial de Movimientos</summary>
+            <input type="text" class="history-search" placeholder="🔍 Buscar nota o fecha..." oninput="filterHistory('${env.id}', this.value)">
             <div class="history-list" id="history-list-${env.id}">
               ${historyHtml}
             </div>
@@ -580,7 +689,7 @@
 
         const option = document.createElement('option');
         option.value = env.id;
-        option.textContent = env.name;
+        option.textContent = `${icon} ${env.name}`;
         selectContainer.appendChild(option);
       });
 
